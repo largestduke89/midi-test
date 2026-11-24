@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Timing Slip Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand" aria-hidden="false">
+      <span class="keys" aria-hidden="true"><i></i><i class="b"></i><i></i><i class="b"></i><i></i><i></i><i class="b"></i><i></i></span>
+      <b>Timing Slip Test</b>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#test" id="tab-test">Take the test</a>
+      <a href="#results" id="tab-results">Results</a>
+    </nav>
+  </header>
+
+  <!-- ================= TEST ================= -->
+  <section id="view-test">
+    <div class="stage" id="stage-setup">
+      <div class="lede">
+        <div class="score-note">Beethoven · Sonata No. 14, 3rd mvt · Presto agitato</div>
+        <h1>Can you hear a note that's a few milliseconds off?</h1>
+        <p>You'll hear the piece played by a computer, perfectly in time. Every so often, one note will land early or late. Press the button (or the space bar) as soon as you hear something wrong. You won't be told during the test whether you were right.</p>
+      </div>
+      <form class="setup" id="setup" onsubmit="return false">
+        <fieldset>
+          <legend>How well do you play piano?</legend>
+          <div class="opts" id="opt-exp"></div>
+        </fieldset>
+        <fieldset>
+          <legend>What are you listening on?</legend>
+          <div class="opts" id="opt-dev"></div>
+        </fieldset>
+        <fieldset>
+          <legend>How long?</legend>
+          <div class="opts" id="opt-len"></div>
+        </fieldset>
+        <div id="access-note" class="notice" hidden></div>
+        <div class="row">
+          <button class="btn primary go" id="go" type="button" disabled>Loading piano…</button>
+          <span class="hint" id="go-hint">Pick an experience level to start. Use a quiet room if you can.</span>
+        </div>
+      </form>
+    </div>
+
+    <div class="stage play" id="stage-play" hidden>
+      <div class="score-note" id="play-label">Listening</div>
+      <button class="heard" id="heard" type="button" aria-label="I heard a mistake">I heard a mistake<small>or press the space bar</small></button>
+      <div class="prog">
+        <div class="bar"><i id="bar"></i></div>
+        <div class="row"><span id="t-now">0:00</span><span id="t-end">0:00</span></div>
+      </div>
+      <div class="presses" id="presses">0 presses</div>
+      <div class="row"><button class="btn" id="stop" type="button">Stop and save</button></div>
+      <p class="hint">Keep this tab open and in front while it plays.</p>
+    </div>
+
+    <div class="stage play" id="stage-done" hidden>
+      <div class="lede" style="text-align:center"><h1>Thanks, that's saved.</h1><p id="done-sub" style="margin-inline:auto">Here's how you did.</p></div>
+      <div class="done-grid" id="done-grid"></div>
+      <div class="save-state" id="save-state">Saving…</div>
+      <div class="row"><button class="btn primary" id="again" type="button">Take it again</button><a class="btn" href="#results">See all results</a></div>
+    </div>
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <section id="view-results" hidden>
+    <div class="dash">
+      <aside class="rail" aria-label="Filters">
+        <div class="grp">
+          <h3>People</h3>
+          <div class="ctl"><span>Experience</span><div class="chips" id="f-exp"></div></div>
+          <div class="ctl"><span>Listening on</span><div class="chips" id="f-dev"></div></div>
+          <label class="check"><input type="checkbox" id="f-mine"> Only my attempts</label>
+        </div>
+        <div class="grp">
+          <h3>Attempt quality</h3>
+          <div class="ctl"><label for="f-fpm">Max false alarms per minute <output id="o-fpm"></output></label><input type="range" id="f-fpm" min="0" max="31" step="1" value="31"></div>
+          <div class="ctl"><label for="f-fps">Max share of presses that were false <output id="o-fps"></output></label><input type="range" id="f-fps" min="0" max="100" step="5" value="100"></div>
+          <div class="ctl"><label for="f-minl">Min listening time <output id="o-minl"></output></label><input type="range" id="f-minl" min="0" max="400" step="10" value="30"></div>
+          <label class="check"><input type="checkbox" id="f-inc" checked> Include attempts stopped early</label>
+          <label class="check"><input type="checkbox" id="f-silent"> Exclude attempts with no presses at all</label>
+        </div>
+        <div class="grp">
+          <h3>The mistake</h3>
+          <div class="ctl"><span>Direction</span><div class="chips" id="f-dir"></div></div>
+          <div class="ctl"><label>Delay range <output id="o-dr"></output></label>
+            <div class="pair"><input type="range" id="f-dmin" min="1" max="200" value="1" aria-label="Minimum delay"><input type="range" id="f-dmax" min="1" max="200" value="200" aria-label="Maximum delay"></div></div>
+          <div class="ctl"><span>Note texture</span><div class="chips" id="f-chord"></div></div>
+          <div class="ctl"><label for="f-gap">Min gap to neighbouring notes <output id="o-gap"></output></label><input type="range" id="f-gap" min="0" max="300" step="10" value="0"></div>
+          <div class="ctl"><label>Note density (notes/sec) <output id="o-dn"></output></label>
+            <div class="pair"><input type="range" id="f-dnmin" min="0" max="40" value="0" aria-label="Minimum density"><input type="range" id="f-dnmax" min="0" max="40" value="40" aria-label="Maximum density"></div></div>
+        </div>
+        <div class="grp">
+          <h3>Pitch</h3>
+          <div class="ctl"><span>Half of the octave</span><div class="chips" id="f-half"></div></div>
+          <div class="ctl"><span>Register</span><div class="chips" id="f-reg"></div></div>
+          <div class="ctl"><span>Octave</span><div class="chips" id="f-oct"></div></div>
+          <div class="ctl"><label>Pitch range <output id="o-pr"></output></label>
+            <div class="pair"><input type="range" id="f-pmin" min="29" max="88" value="29" aria-label="Lowest pitch"><input type="range" id="f-pmax" min="29" max="88" value="88" aria-label="Highest pitch"></div></div>
+        </div>
+        <div class="grp">
+          <h3>Place in the piece</h3>
+          <div class="ctl"><label>Song time <output id="o-st"></output></label>
+            <div class="pair"><input type="range" id="f-smin" min="0" max="410" step="5" value="0" aria-label="From"><input type="range" id="f-smax" min="0" max="410" step="5" value="410" aria-label="To"></div></div>
+          <div class="ctl"><span>Mistake number within an attempt</span><div class="chips" id="f-order"></div></div>
+        </div>
+        <div class="grp">
+          <h3>Analysis</h3>
+          <div class="ctl"><label for="f-split">Compare lines by</label><select id="f-split"></select></div>
+          <div class="ctl"><label for="f-bin">Delay bucket size</label><select id="f-bin"><option>5</option><option selected>10</option><option>20</option><option>25</option><option>40</option><option>50</option></select></div>
+          <div class="ctl"><label for="f-win">Press counts if within <output id="o-win"></output></label><input type="range" id="f-win" min="500" max="3000" step="250" value="3000"></div>
+          <div class="ctl"><label for="f-rt">Ignore presses faster than <output id="o-rt"></output></label><input type="range" id="f-rt" min="0" max="400" step="25" value="100"></div>
+          <div class="ctl"><label for="f-minn">Hide buckets with fewer than <output id="o-minn"></output> mistakes</label><input type="range" id="f-minn" min="1" max="20" value="3"></div>
+          <button class="btn" type="button" id="f-reset">Reset filters</button>
+        </div>
+      </aside>
+
+      <div class="main">
+        <div id="db-note" class="notice" hidden></div>
+        <div class="tiles" id="tiles"></div>
+        <div class="card">
+          <h2>Share of mistakes noticed, by how far off the note was</h2>
+          <div class="sub" id="chart-sub">Each point is one delay bucket. Hover for counts.</div>
+          <div class="legend" id="legend"></div>
+          <div class="chartwrap" id="chartwrap"></div>
+        </div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <div><h2>Table view</h2><div class="sub">% noticed, with the number of mistakes in each bucket.</div></div>
+            <div class="row"><button class="btn" id="csv-copy" type="button">Copy CSV</button><button class="btn" id="csv-dl" type="button" hidden>Download CSV</button></div>
+          </div>
+          <div class="hint" id="csv-msg"></div>
+          <div class="tablewrap" id="tablewrap"></div>
+        </div>
+        <div class="card">
+          <h2>What the quality filters removed</h2>
+          <div class="qual" id="qual" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
