@@ -1,2 +1,4 @@
 results.json
 results.json.tmp
+.wrangler/
+node_modules/
