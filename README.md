@@ -5,14 +5,11 @@ A listening test: the 3rd movement of Beethoven's "Moonlight" Sonata plays on a 
 ## Run it on your own computer
 Double-click `start.bat` (needs [Node.js](https://nodejs.org)). It opens http://localhost:8080. Results are saved to `results.json`.
 
-## Put it online with Cloudflare Pages + D1
-1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git** → pick this repo.
-2. Build settings: Framework preset **None**, build command **empty**, build output directory **`public`**. Deploy.
-3. **Storage & Databases** → **D1** → **Create database**, name it `timing-results`.
-4. Your Pages project → **Settings** → **Bindings** → **Add** → **D1 database**: variable name **`DB`**, database `timing-results`. Save.
-5. **Deployments** → latest → **Retry deployment** so the binding takes effect.
-
-The results table is created automatically on the first save.
+## Online: piano.pgccl.com
+It runs as the Cloudflare Worker `midi-test`, connected to this GitHub repo: **every push to `main` redeploys the site.**
+- `wrangler.jsonc` sets it up: files in `public/` are served as-is, `/api/*` goes to `worker/index.js`, and results are stored in the D1 database `timing-results` (bound as `DB`).
+- The results table is created automatically on the first save.
+- To deploy by hand instead: `npx wrangler deploy`.
 
 ## Getting the data out
 - Results tab → **Download all results**: `slips` (one row per slip), `attempts` (one row per attempt, for spotting random clickers), `presses` (one row per press, to re-score with your own window).
@@ -23,8 +20,9 @@ The results table is created automatically on the first save.
 | Path | What it is |
 |---|---|
 | `public/` | The website (served as-is) |
-| `functions/api/` | Cloudflare functions: save, load, export |
+| `worker/` | Cloudflare Worker: save, load, export |
 | `lib/results.mjs` | Validation and CSV export, shared by both servers |
+| `wrangler.jsonc` | Cloudflare config (Worker name, assets folder, database) |
 | `server.js`, `start.bat` | Local server |
 
 Piano samples: Salamander Grand Piano by Alexander Holm, CC-BY 3.0.

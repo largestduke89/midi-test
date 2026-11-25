@@ -1,5 +1,5 @@
-// Cloudflare D1 helpers. The D1 database must be bound to the Pages project with the variable name DB.
-// Files starting with "_" are not routes.
+// Cloudflare D1 helpers. The D1 database is bound to the Worker as DB (see wrangler.jsonc).
+
 
 let schemaReady = null;
 export function ensureSchema(db) {
@@ -27,7 +27,7 @@ export async function allAttempts(db) {
 }
 
 export function noDb() {
-  return json({ error: "No database is connected. In Cloudflare: Pages project → Settings → Bindings → add a D1 database with the variable name DB, then redeploy." }, 500);
+  return json({ error: "No database is connected. In Cloudflare: Workers & Pages → midi-test → Settings → Bindings → add the D1 database with the variable name DB." }, 500);
 }
 
 export function json(body, status = 200) {

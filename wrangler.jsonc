@@ -1,0 +1,18 @@
+// Cloudflare Worker "midi-test" (serves piano.pgccl.com). Deployed automatically from GitHub on every push.
+{
+  "name": "midi-test",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-24",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "timing-results",
+      "database_id": "075d00ad-802f-44fc-b794-635d735f67fb"
+    }
+  ]
+}
