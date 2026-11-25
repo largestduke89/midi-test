@@ -1,0 +1,9 @@
+# Cloudflare Pages config: the site is public/, the API is functions/, results go to the D1 database below.
+name = "midi-test"
+pages_build_output_dir = "public"
+compatibility_date = "2025-09-24"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "timing-results"
+database_id = "075d00ad-802f-44fc-b794-635d735f67fb"
